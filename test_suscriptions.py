@@ -3,8 +3,9 @@ import time
 from pygqlc import GraphQLClient
 import logging
 import json
+import datetime
 # from multiprocessing 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(filename='test_suscriptions.log',level=logging.INFO)
 
 gql = GraphQLClient()
 gql.addEnvironment(
@@ -33,13 +34,16 @@ last_time_received = time.perf_counter()
 
 def on_datum_created(message):
     global last_time_received
-    logging.info(message)
+    # logging.info(message)
     last_time_received = time.perf_counter()
 
 
 def on_notification_created(message):
     global last_time_received
-    logging.info(message)
+    now = datetime.datetime.now()
+    nowS = now.strftime("%Y-%m-%d %H:%M:%S")
+    logging.info(f'[{nowS}] {message}')
+    print(f'[{nowS}] {message}')
     last_time_received = time.perf_counter()
 
 
@@ -61,7 +65,18 @@ def testResetSubsConnection():
 
   gql.resetSubsConnection()
 
+def monitor_subscriptions():
+  while True:
+    elapsed_time = time.perf_counter() - last_time_received
+    if elapsed_time > 45:
+      now = datetime.datetime.now()
+      nowS = now.strftime("%Y-%m-%d %H:%M:%S")
+      logging.warning(f'[{nowS}]: No datos Subs, Reintentando conectar ...')
+      print(f'[{nowS}]: No datos Subs, Reintentando conectar ...')
+      gql.resetSubsConnection()
+      time.sleep(15)
+
 
 if __name__ == "__main__":
   time.sleep(5)
-  testResetSubsConnection()
+  # testResetSubsConnection()
