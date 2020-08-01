@@ -80,3 +80,8 @@ def monitor_subscriptions():
 if __name__ == "__main__":
   time.sleep(5)
   # testResetSubsConnection()
+  now = datetime.datetime.now()
+  nowS = now.strftime("%Y-%m-%d %H:%M:%S")
+  logging.info(f'[{nowS}]: Program starting ...')
+  print(f'[{nowS}]: Program starting ...')
+  monitor_subscriptions()
