@@ -4,21 +4,9 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [dev-packages]
-pytest = "*"
-pylint = "*"
-autopep8 = "*"
-setuptools = "*"
-wheel = "*"
-twine = "*"
-pytest-cov = "*"
 
 [packages]
-requests = "*"
-pydash = "*"
-singleton-decorator = "*"
-tenacity = "*"
-websocket-client = "==0.54.0"
-pygqlc = {editable = true,path = "/Users/antzlp/Valiot/pygqlc"}
+pygqlc = "*"
 
 [requires]
 python_version = "3.7"
