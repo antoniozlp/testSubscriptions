@@ -3,8 +3,8 @@ import time
 from pygqlc import GraphQLClient
 import logging
 import json
-# from multiprocessing 
-logging.basicConfig(level=logging.INFO)
+import datetime
+logging.basicConfig(filename='test_suscriptions.log', level=logging.INFO)
 
 gql = GraphQLClient()
 gql.addEnvironment(
@@ -15,38 +15,58 @@ gql.addEnvironment(
     timeoutWebsocket=35,
     default=True)
 
-subscription_all_variables = """subscription{
+subscription_all_variables = '''subscription{
   datumCreated{
       result{variable{name} value insertedAt}
   }
-}"""
+}'''
 
-subscription_notifications = """subscription{
+subscription_notifications = '''subscription{
   notificationCreated
   {
     successful
     result{title, content}
   }
-}"""
+}'''
+
+subscription_variableState = '''subscription{
+  variableStateCreated{
+    result{
+      id
+      variable{code}
+      state
+      startAt
+    }
+  }
+}'''
 
 last_time_received = time.perf_counter()
 
+
 def on_datum_created(message):
     global last_time_received
-    logging.info(message)
+    now = datetime.datetime.now()
+    nowS = now.strftime("%Y-%m-%d %H:%M:%S")
+    logging.info(f'[{nowS}] [Datum] {message}')
+    print(f'[{nowS}] [Datum] {message}')
     last_time_received = time.perf_counter()
 
 
 def on_notification_created(message):
     global last_time_received
-    logging.info(message)
+    now = datetime.datetime.now()
+    nowS = now.strftime("%Y-%m-%d %H:%M:%S")
+    logging.info(f'[{nowS}] [Notification] {message}')
+    print(f'[{nowS}] [Notification]  {message}')
     last_time_received = time.perf_counter()
 
-
-unsub1 = gql.subscribe(subscription_all_variables,
-                      callback=on_datum_created)
-unsub2 = gql.subscribe(subscription_notifications,
-                      callback=on_notification_created)
+def on_variableState_created(message):
+    global last_time_received
+    now = datetime.datetime.now()
+    nowS = now.strftime("%Y-%m-%d %H:%M:%S")
+    logging.info(f'[{nowS}] [variableState] {message}')
+    print(f'[{nowS}] [variableState] {message}')
+    last_time_received = time.perf_counter()
 
 
 def testResetSubsConnection():
@@ -62,6 +82,29 @@ def testResetSubsConnection():
   gql.resetSubsConnection()
 
 
+def monitor_subscriptions():
+  while True:
+    elapsed_time = time.perf_counter() - last_time_received
+    if elapsed_time > 10:
+      now = datetime.datetime.now()
+      nowS = now.strftime("%Y-%m-%d %H:%M:%S")
+      logging.warning(f'[{nowS}]: No datos Subs, Reintentando conectar ...')
+      print(f'[{nowS}]: No datos Subs, Reintentando conectar ...')
+      gql.resetSubsConnection()
+      time.sleep(15)
+
+
 if __name__ == "__main__":
+  now = datetime.datetime.now()
+  nowS = now.strftime("%Y-%m-%d %H:%M:%S")
+  print(f'[{nowS}]: Program starting ...')
+  unsub1 = gql.subscribe(subscription_all_variables,
+                         callback=on_datum_created)
+  unsub2 = gql.subscribe(subscription_notifications,
+                         callback=on_notification_created)
+  unsub3 = gql.subscribe(subscription_variableState,
+                         callback=on_variableState_created)
+                         
   time.sleep(5)
-  testResetSubsConnection()
+  # testResetSubsConnection()
+  monitor_subscriptions()
