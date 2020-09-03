@@ -85,7 +85,7 @@ def testResetSubsConnection():
 def monitor_subscriptions():
   while True:
     elapsed_time = time.perf_counter() - last_time_received
-    if elapsed_time > 10:
+    if elapsed_time > 3600:
       now = datetime.datetime.now()
       nowS = now.strftime("%Y-%m-%d %H:%M:%S")
       logging.warning(f'[{nowS}]: No datos Subs, Reintentando conectar ...')

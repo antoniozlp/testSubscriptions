@@ -19,11 +19,13 @@ gql.addEnvironment(
 def postValialveLoop(varialeCode, rangeValues, frequency, increment):
     value = randint(rangeValues['min'], rangeValues['max'])
     while True:
-        print(varialeCode + ': ' + str(value))
+        initialTime = time.time()
         _, errors_userMut = gql.mutate(createDatum, variables={"code": varialeCode,"value":value})
         if(errors_userMut):
             print(errors_userMut)
-
+        else:
+            timePost = time.time() - initialTime
+            print(f'[T:{timePost}] {varialeCode} : {value}')
         if type(increment) == str:
             if increment == 'randint':
                 value = randint(rangeValues['min'], rangeValues['max'])
